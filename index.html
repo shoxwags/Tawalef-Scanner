@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مستودع التوالف</title>
+<meta name="theme-color" content="#9a3412">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="التوالف">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="appName">مستودع التوالف</h1>
+      <p class="sync" id="syncLine">جاري التشغيل…</p>
+    </div>
+    <button type="button" id="installBtn" class="ghost" hidden>تثبيت التطبيق</button>
+  </header>
+
+  <!-- تسجيل الدخول: باسورد واحد للكل -->
+  <form id="loginView" class="panel" hidden>
+    <div class="eyebrow">تسجيل الدخول</div>
+    <p class="muted">اكتب باسورد الفريق مرة واحدة على الموبايل ده.</p>
+    <div id="emailWrap" hidden>
+      <label class="field-label" for="email">إيميل المشرف</label>
+      <input type="email" id="email" autocomplete="username" inputmode="email" dir="ltr">
+    </div>
+    <label class="field-label" for="password">الباسورد</label>
+    <input type="password" id="password" autocomplete="current-password" required dir="ltr">
+    <button type="submit" id="loginBtn" class="primary">دخول</button>
+    <button type="button" id="adminToggle" class="link">دخول كمشرف</button>
+    <div class="status" id="loginStatus"></div>
+  </form>
+
+  <div id="setupView" class="panel" hidden>
+    <div class="eyebrow">محتاج إعداد</div>
+    <p>التطبيق لسه مش متوصل بـ Supabase. افتح <code>config.js</code> وحط فيه الـ Project URL والـ anon key زي ما مكتوب في دليل الإعداد.</p>
+  </div>
+
+  <!-- التطبيق -->
+  <div id="appView" class="stack" hidden>
+    <section class="batchbar" aria-label="الدفعة الحالية">
+      <div>
+        <div class="eyebrow">الدفعة الحالية</div>
+        <div class="batch-name" id="batchName">دفعة جديدة</div>
+        <div class="batch-date" id="batchDate"></div>
+      </div>
+      <div class="batch-stats"><strong id="lineCount">0</strong> صنف · <strong id="qtyCount">0</strong> قطعة</div>
+    </section>
+
+    <section class="panel" aria-label="السكانر">
+      <div id="scanner" class="scanner" hidden>
+        <video id="video" playsinline muted></video>
+        <div class="aim" aria-hidden="true"><span></span></div>
+        <div class="scan-ctrls">
+          <button type="button" id="torchBtn" class="chip" hidden>كشاف</button>
+          <button type="button" id="stopBtn" class="chip">إيقاف</button>
+        </div>
+      </div>
+      <button type="button" id="startBtn" class="primary">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>
+        <span>ابدأ المسح</span>
+      </button>
+      <input type="text" id="manual" autocomplete="off" enterkeyhint="search" inputmode="text" placeholder="أو اكتب الباركود أو رقم الصنف واضغط Enter">
+      <div class="status" id="status">وجّه الكاميرا على الباركود. بيفضل يمسح لحد ما تدوس إيقاف.</div>
+      <label class="photo-link" for="photo">الكاميرا مش شغالة؟ صوّر الباركود بدلها</label>
+      <input class="hidden-file" type="file" id="photo" accept="image/*" capture="environment">
+    </section>
+
+    <!-- الصنف الحالي + العداد + سبميت -->
+    <section id="current" class="current idle" aria-live="polite">
+      <div class="eyebrow">الصنف</div>
+      <div class="idle-text">امسح باركود عشان تظهر بيانات الصنف</div>
+    </section>
+
+    <section class="panel" aria-label="أصناف الدفعة">
+      <div class="list-head">
+        <div class="eyebrow">أصناف الدفعة</div>
+        <span class="muted" id="pendingLine"></span>
+      </div>
+      <ul class="lines" id="lines"></ul>
+      <div class="actions">
+        <button type="button" id="exportBtn" class="primary-outline">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
+          تحميل شيت إكسل
+        </button>
+        <button type="button" id="newSessionBtn" class="dark">سيشن جديدة</button>
+      </div>
+      <div class="confirm" id="newConfirm" hidden>
+        <p id="newConfirmText"></p>
+        <div class="row">
+          <button type="button" id="newConfirmYes" class="primary small">أيوة، ابدأ دفعة جديدة</button>
+          <button type="button" id="newConfirmNo">إلغاء</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel admin" id="adminPanel" aria-label="تحديث شيت الأصناف" hidden>
+      <div class="eyebrow">المشرف · تحديث شيت الأصناف</div>
+      <p class="muted">ارفع آخر نسخة من شيت الأصناف (Excel أو CSV). بتحل محل القديمة عند الكل، والموبايلات بتاخدها أول ما التطبيق يتفتح. أول صف لازم يكون العناوين: Barcode, Item Number, Description, Warehouse, Supplier, Target Location.</p>
+      <label class="btn primary-outline" for="uploadFile">اختار ملف Excel / CSV</label>
+      <input class="hidden-file" type="file" id="uploadFile" accept=".xlsx,.xls,.csv,.txt">
+      <div class="confirm" id="confirmBox" hidden>
+        <p id="confirmText"></p>
+        <div class="row">
+          <button type="button" id="confirmUpload" class="primary small">انشر لكل الموبايلات</button>
+          <button type="button" id="cancelUpload">إلغاء</button>
+        </div>
+      </div>
+      <div class="status" id="adminStatus"></div>
+    </section>
+
+    <section class="panel" aria-label="بيانات الأصناف">
+      <div class="list-meta">
+        <span><strong id="count">0</strong> باركود محفوظ على الموبايل</span>
+        <span id="userLine" dir="ltr"></span>
+      </div>
+      <div class="row">
+        <button type="button" id="refreshBtn">تحقق من تحديث شيت الأصناف</button>
+      </div>
+      <details>
+        <summary>الإعدادات</summary>
+        <div class="settings">
+          <p class="muted">التطبيق بيعرف العواميد من أسمائها. غيّرها بس لو اختار عمود غلط.</p>
+          <div id="colPickers" class="col-pickers"></div>
+          <label class="check"><input type="checkbox" id="autoAdd" checked> لو مسحت صنف تاني قبل ما تدوس سبميت، ضيف الصنف اللي قبله تلقائي</label>
+          <button type="button" id="signOutBtn" class="danger">خروج ومسح البيانات من الموبايل ده</button>
+        </div>
+      </details>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/zxing.min.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
