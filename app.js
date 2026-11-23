@@ -297,7 +297,8 @@ $("loginView").addEventListener("submit", async e => {
   } catch (err) {
     $("loginStatus").className = "status err";
     $("loginStatus").textContent = !navigator.onLine ? "مفيش نت. اتصل بالإنترنت عشان تسجل دخول."
-      : /invalid/i.test(err.message || "") ? "الباسورد غلط. اتأكد منه أو اسأل المشرف."
+      : /not confirmed/i.test(err.message || "") ? `الحساب ${email} لسه مش متأكد (Confirm) في Supabase. اطلب من المشرف يأكده.`
+      : /invalid/i.test(err.message || "") ? (adminMode ? `الإيميل أو الباسورد غلط (${email}).` : `باسورد الفريق غلط، أو حساب الفريق ${email} مش موجود في Supabase. اسأل المشرف.`)
       : "ماقدرش يسجل دخول: " + (err.message || "خطأ غير معروف");
   } finally { btn.disabled = false; }
 });
