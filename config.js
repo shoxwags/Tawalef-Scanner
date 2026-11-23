@@ -6,10 +6,10 @@
 window.TW_CONFIG = {
   // من Supabase: Project Settings > API (أو زرار Connect).
   // "Project URL" مثلاً https://abcdefghijkl.supabase.co
-  SUPABASE_URL: "",
+  SUPABASE_URL: "https://ayokdkmkhgdiqfwtwufr.supabase.co",
   // مفتاح "anon" / "publishable". آمن إنه يتحط هنا، لأن قواعد قاعدة البيانات هي اللي بتحمي البيانات.
   // متحطش أبداً مفتاح "service_role" / "secret" هنا.
-  SUPABASE_ANON_KEY: "",
+  SUPABASE_ANON_KEY: "sb_publishable_2ROz5M_M2b2tABsR2qcKaw_doMhLxA0",
 
   // الحساب المشترك اللي كل الموظفين بيدخلوا بيه (باسورد واحد للكل).
   // اعمله من Authentication > Users > Add user، وحط الإيميل هنا. الباسورد بتقوله للموظفين بس.
