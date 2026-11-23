@@ -24,7 +24,7 @@ const FIELDS = [
   { k: "wh",   label: "المستودع",        re: /warehouse|^wh\b|store|مستودع/ },
   { k: "sup",  label: "المورد",          re: /supplier|vendor|مورد/ },
   { k: "item", label: "رقم الصنف",       re: /item ?(no|num|number|code|#|id)\b|^item$|sku|article|material|رقم الصنف|كود الصنف|رقم/ },
-  { k: "desc", label: "الوصف",           re: /desc|name|product|وصف|اسم/ },
+  { k: "desc", label: "الوصف",           re: /desc|name|product|وصف|اسم/, prefer: /arabic|عربي/ },
 ];
 
 let sb = null, user = null, isAdmin = false;
@@ -115,8 +115,15 @@ function detectCols(headers, useSaved = true) {
   const saved = (useSaved && pref.get("cols-" + headers.join("|"))) || {};
   const c = {}, used = [];
   for (const f of FIELDS) {
-    let i = saved[f.k] ?? headers.findIndex((h, j) => !used.includes(j) && f.re.test(h.toLowerCase()));
-    if (f.k === "code" && i < 0) i = 0;
+    const find = re => headers.findIndex((h, j) => !used.includes(j) && re.test(h.toLowerCase()));
+    let i = saved[f.k] ?? -1;
+    if (saved[f.k] == null) {
+      if (f.prefer) { i = find(f.prefer); if (i >= 0 && !f.re.test(headers[i].toLowerCase())) i = -1; }
+      if (i < 0) i = find(f.re);
+      // مفيش عمود باركود؟ استخدم الـ SKU كأنه الباركود (اللي بيتمسح أو بيتكتب)
+      if (f.k === "code" && i < 0) i = find(/^sku$|sku|item ?code/);
+      if (f.k === "code" && i < 0) i = 0;
+    }
     c[f.k] = i; if (i >= 0) used.push(i);
   }
   return c;
@@ -131,7 +138,7 @@ function buildIndex() {
   for (const r of data.rows) {
     const c = norm(r[cols.code]); if (!c) continue; n++;
     add(byCode, c, r); add(byCode, "z:" + stripZeros(c), r);
-    if (cols.item >= 0) add(byItem, norm(r[cols.item]).toLowerCase(), r);
+    if (cols.item >= 0) { const it = norm(r[cols.item]).toLowerCase(); add(byItem, it, r); if (stripZeros(it) !== it) add(byItem, stripZeros(it), r); }
   }
   $("count").textContent = num(n);
   const box = $("colPickers"); box.innerHTML = "";
@@ -347,7 +354,7 @@ $("confirmUpload").addEventListener("click", async () => {
 function lookup(raw, fromCamera) {
   const n = norm(raw); if (!n) return [];
   let rows = byCode.get(n) || byCode.get("z:" + stripZeros(n));
-  if (!rows && !fromCamera) rows = byItem.get(n.toLowerCase());
+  if (!rows) rows = byItem.get(n.toLowerCase()) || byItem.get(stripZeros(n.toLowerCase()));
   if (!rows) return [];
   // نفس الصنف مكرر بنفس البيانات؟ اعرضه مرة واحدة
   const seen = new Set();
