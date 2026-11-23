@@ -38,7 +38,7 @@
 
 1. **Authentication > Sign In / Providers**: اقفل **"Allow new users to sign up"**.
 2. **حساب الفريق المشترك:** **Authentication > Users > Add user > Create new user**،
-   الإيميل `team@tawalef.local` (أو أي إيميل، بس لازم يبقى نفس اللي في `config.js`)، وباسورد سهل للفريق، وعلّم **Auto Confirm User**.
+   الإيميل `tawalef-scanner@othaimmarkets.com` (أو أي إيميل، بس لازم يبقى نفس اللي في `config.js`)، وباسورد سهل للفريق، وعلّم **Auto Confirm User**.
 3. **حسابك كمشرف:** اعمل يوزر تاني بإيميلك، وبعدين في **SQL Editor** شغّل:
    ```sql
    insert into public.app_admins (user_id)

@@ -13,7 +13,7 @@ window.TW_CONFIG = {
 
   // الحساب المشترك اللي كل الموظفين بيدخلوا بيه (باسورد واحد للكل).
   // اعمله من Authentication > Users > Add user، وحط الإيميل هنا. الباسورد بتقوله للموظفين بس.
-  SHARED_EMAIL: "team@tawalef.local",
+  SHARED_EMAIL: "tawalef-scanner@othaimmarkets.com",
 
   // سيبهم زي ما هم إلا لو غيرتهم في setup.sql.
   BUCKET: "tawalef-data",
